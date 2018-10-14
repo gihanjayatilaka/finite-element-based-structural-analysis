@@ -5,36 +5,10 @@
     "no_of_fixed_points" : 3,
 
     "nodes":[
-        {
-            "id":0,
-            "x":1,
-            "y":0,
-            "z":0
-
-        },
-
-        {
-            "id":1,
-            "x":3,
-            "y":3,
-            "z":0
-
-        },
-
-        {
-            "id":2,
-            "x":5,
-            "y":4,
-            "z":0
-
-        },
-        {
-            "id":3,
-            "x":5,
-            "y":0,
-            "z":0
-
-        }
+        {   "id":0,"x":1,"y":0,"z":0    },
+        {   "id":1,"x":3,"y":3,"z":0    },
+        {   "id":2,"x":5,"y":4,"z":0    },
+        {   "id":3,"x":5,"y":0,"z":0    }
     ],
 
     
@@ -73,16 +47,10 @@
         {
             "id": 0, 
             "point_id":1,
-            "force":{
-                "force_x":10,
-                "force_y":0,
-                "force_z":0                  
-            }, 
-            "torque":{
-                "torque_x":0,
-                "torque_y":0,
-                "torque_z":0                   
-            }
+            "force":
+            {   "x":10, "y":0, "z":0}, 
+            "torque":
+            {   "x":0, "y":0, "z":0 }
         }
     ],
 
@@ -92,32 +60,26 @@
         {
             "id" : 0,
             "point_id":0,
-            "x_translation_fixed":true,
-            "y_translation_fixed":true,
-            "z_translation_fixed":true,
-            "x_rotation_fixed":true,
-            "y_rotation_fixed":true,
-            "z_rotation_fixed":false,
+            "translation":
+            {  "x":true,"y":true,"z":true},
+            "rotation":
+            {  "x":true,"y":true,"z":false}
         },
         {
             "id" : 1,
             "point_id":2,
-            "x_translation_fixed":true,
-            "y_translation_fixed":false,
-            "z_translation_fixed":true,
-            "x_rotation_fixed":true,
-            "y_rotation_fixed":true,
-            "z_rotation_fixed":false,
+            "translation":
+            {  "x":true,"y":false,"z":true},
+            "rotation":
+            {  "x":true,"y":true,"z":false}
         },
         {
             "id" : 2,
             "point_id":3,
-            "x_translation_fixed":true,
-            "y_translation_fixed":true,
-            "z_translation_fixed":true,
-            "x_rotation_fixed":true,
-            "y_rotation_fixed":true,
-            "z_rotation_fixed":true,
+            "translation":
+            {  "x":true,"y":true,"z":true},
+            "rotation":
+            {  "x":true,"y":true,"z":true}
         }
 
 
