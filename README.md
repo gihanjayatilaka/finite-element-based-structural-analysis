@@ -10,4 +10,3 @@ This is the master branch. Please don't make any direct commits to this branch. 
 2. Merge your local dev to your local master.
 3. Push it to YOUR remote.
 4. Send a pull request to TeambiteCode/master
-
