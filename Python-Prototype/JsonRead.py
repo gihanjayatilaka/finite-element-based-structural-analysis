@@ -13,7 +13,7 @@ def readFile(fileName):
 def writeFile(data, fileName):
     '''
 
-    :param data: disctionary to be written to file
+    :param data: dictionary to be written to file
     :param fileName: The json file name
     '''
 	with open(fileName, 'w') as file:
