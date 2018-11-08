@@ -2,26 +2,26 @@ import json
 import numpy as np
 
 def getCordinates():
-    '''
-
-    :return: 2d array with x and y cordinates
-    '''
     x=[0, 6, 12, 18, 24, 18, 12, 6]
     y=[0, 0, 0, 0, 0, 6, 6, 6]
     return x, y
 
 def getECM():
-    '''
-
-    :return: ECM matrix
-    '''
     ECM=[[1, 2, 3, 4, 5, 6, 7, 1, 2, 2, 3, 4, 4], [2, 3, 4, 5, 6, 7, 8, 8, 8, 7, 7, 7, 6]]
     return np.array(ECM, dtype = int).T-1
+
+def get_angle():
+    pi = np.pi
+    return np.array([0, 0, 0, 0, pi / 4 * 3, pi, pi, pi / 4, pi / 2, pi / 4, pi / 2, pi / 4 * 3, pi / 2])
 
 def get_k_global(A, E, L, ang):
     k = get_k_local(ang)
     const = A * E / L
     return const*k
+
+def get_force_vect():
+    return np.array([0, 0, 0, -200, 0, -100, 0, -100, 0, 0, 0, 0, 0, 0, 0, 0])
+
 
 def get_k_local(ang):
     c = np.cos(ang)
@@ -35,6 +35,8 @@ def get_k_local(ang):
                     [cs, ss, -cs, -ss],
                     [-cc, -cs, cc, cs],
                     [-cs, -ss, cs, ss]])
+
+    return arr
 
 
 

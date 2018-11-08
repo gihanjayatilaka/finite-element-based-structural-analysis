@@ -37,8 +37,9 @@ n_dof = ndof
 
 
 t_dof=nn*ndof
-pi = np.pi
-ang = np.array([0, 0, 0, 0, pi/4*3, pi, pi, pi/4, pi/2, pi/4, pi/2, pi/4*3, pi/2])
+el_dof = n_en*n_dof
+ang = get_angle()
+
 # LCM = np.zeros((2*ndof,nel))	#; %Local Coo matrix
 # K = np.zeros((nn*ndof,nn*ndof))	#; % Global stiffness matrix
 
@@ -63,7 +64,7 @@ BC=np.array([1, 2, 10], dtype=int)	#; %restrained dof
 dof_node = (np.arange(n_dof * n_n).reshape((n_n, n_dof)))
 
 LCM = dof_node[ECM, :]
-# LCM = (LCM.reshape(n_el, n_en*n_dof)).T
+LCM = (LCM.reshape(n_el, n_en*n_dof)).T
 
 '''
 %Element local stiffness matrix ke
@@ -96,14 +97,13 @@ Kf=K
 
 k_local = get_k_global(A, E, L, ang)
 
+x = np.repeat(LCM, el_dof, axis = 0).reshape(el_dof, el_dof, n_el)
+y = np.transpose(x, (1, 0, 2))
+
 K = np.zeros((t_dof, t_dof))
 
-k = np.arange(n_el, dtype=int)
-cc = c*c
-cs = c*s
-ss = s*s
+K[x, y] += k_local
 
-sub_arr =
 
 '''
 
@@ -121,21 +121,26 @@ end
 
 z = np.zeros((t_dof), dtype=int)
 
-K[BC] = zv v
+K[BC] = z
+K[BC, BC] = 1
 
 '''
 K
 
 %Force vector
 %------------
+'''
 
-f=[0;0;0;-200;0;-100;0;-100;0;0;0;0;0;0;0;0];
+F = get_force_vect()
 
+'''
 %Displacement vector
 %-------------------
+'''
 
-d=K\f 
+d = np.matmul(np.linalg.inv(K), F)
 
+'''
 %Reaction forces
 %---------------
 
