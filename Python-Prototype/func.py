@@ -19,6 +19,9 @@ def get_k_global(A, E, L, ang):
     const = A * E / L
     return const*k
 
+def get_BC():
+    return np.array([1, 2, 10], dtype=int)-1  # ; %restrained dof
+
 def get_force_vect():
     return np.array([0, 0, 0, -200, 0, -100, 0, -100, 0, 0, 0, 0, 0, 0, 0, 0])
 
@@ -37,10 +40,6 @@ def get_k_local(ang):
                     [-cs, -ss, cs, ss]])
 
     return arr
-
-
-
-
 
 
 def readFile(fileName):

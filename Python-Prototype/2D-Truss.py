@@ -15,7 +15,7 @@ print ("ECM", ECM)
 # Material properites
 # -------------------
 
-E=200*10^6
+E=200*(10**6)
 
 # Geomatric properties
 # ---------------------
@@ -46,7 +46,7 @@ ang = get_angle()
 # %Restrained DOF to Apply BC
 # %---------------------------
 
-BC=np.array([1, 2, 10], dtype=int)	#; %restrained dof
+BC=get_BC()
 
 # %Plotting the truss
 # %------------------
@@ -65,6 +65,7 @@ dof_node = (np.arange(n_dof * n_n).reshape((n_n, n_dof)))
 
 LCM = dof_node[ECM, :]
 LCM = (LCM.reshape(n_el, n_en*n_dof)).T
+print ("LCM", LCM)
 
 '''
 %Element local stiffness matrix ke
@@ -97,12 +98,26 @@ Kf=K
 
 k_local = get_k_global(A, E, L, ang)
 
-x = np.repeat(LCM, el_dof, axis = 0).reshape(el_dof, el_dof, n_el)
-y = np.transpose(x, (1, 0, 2))
+x, y, z = k_local.shape
 
 K = np.zeros((t_dof, t_dof))
 
-K[x, y] += k_local
+for k in range(z):
+    for i in range(x):
+        ii = LCM[i][k]
+        for j in range(y):
+            jj = LCM[j][k]
+            K[ii][jj] += k_local[i][j][k]
+
+
+# x = np.repeat(LCM, el_dof, axis = 0).reshape(el_dof, el_dof, n_el)
+# y = np.transpose(x, (1, 0, 2))
+
+# K = np.zeros((t_dof, t_dof))
+
+# K[x, y] += k_local
+print ("K", K)
+Kf = K.copy()
 
 
 '''
@@ -119,7 +134,7 @@ end
 
 '''
 
-z = np.zeros((t_dof), dtype=int)
+z = np.zeros(t_dof, dtype=int)
 
 K[BC] = z
 K[BC, BC] = 1
@@ -145,7 +160,11 @@ d = np.matmul(np.linalg.inv(K), F)
 %---------------
 
 fr=Kf*d
+'''
 
+fr = np.matmul(Kf, d)
+
+'''
 %Axial forces
 %------------
 
