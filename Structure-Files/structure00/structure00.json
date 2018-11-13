@@ -1,4 +1,5 @@
 {
+    "no_of_crosssection_types":2,
     "no_of_nodes":4,
     "no_of_elements": 3,
     "no_of_loads" : 1,
@@ -11,34 +12,63 @@
         {   "id":3,"x":5,"y":0,"z":0    }
     ],
 
+    "element_type":[
+        {
+            "id":0,
+            "shape":"rectangle",
+            "youngs_mod":150,
+            "density":0,
+            "dimensions":
+                {"y":0.10,"z":0.20}
+        },
+        {
+            "id":1,
+            "shape":"circle",
+            "youngs_mod":150,
+            "density":0,
+            "dimensions":
+                {"radius":0.07}
+        }
+
+    ],
     
     "elements": [
         {
             "id": 0,
             "start_node_id":0,
             "end_node_id":1,
-            "youngs_mod": 150, 
-            "density": 0, 
-            "cross_section_shape": "rectangle", 
-            "cross_section_dim": {"local_x": 0.10, "local_y": 0.20}
+            "element_type": 0,
+            "local_x_dir":
+                {"x":2.0,"y":3.0,"z":1.0},
+            "local_y_dir":
+                {"x":0.0,"y":0.0,"z":-1.0},
+            "local_z_dir":
+                {"x":-3.0,"y":2.0,"z":0.0}    
         }, 
         {
             "id": 1,
             "start_node_id": 1, 
             "end_node_id": 3, 
-            "youngs_mod": 150, 
-            "density": 0, 
-            "cross_section_shape": "rectangle", 
-            "cross_section_dim": {"local_x": 0.10, "local_y": 0.20}
+            "element_type": 0,
+            "local_x_dir":
+                {"x":2.0,"y":-3.0,"z":0.0},
+            "local_y_dir":
+                {"x":0.0,"y":0.0,"z":-1.0},
+            "local_z_dir":
+                {"x":3.0,"y":2.0,"z":0.0}    
+
         },
         {
             "id": 2,
             "start_node_id": 1, 
             "end_node_id": 2, 
-            "youngs_mod": 150, 
-            "density": 0, 
-            "cross_section_shape": "circle",
-            "cross_section_dim": {"radius": 0.07}
+            "element_type": 1,
+            "local_x_dir":
+                {"x":2.0,"y":1.0,"z":0.0},
+            "local_y_dir":
+                {"x":0.0,"y":0.0,"z":1.0},
+            "local_z_dir":
+                {"x":-1.0,"y":2.0,"z":0.0}    
         }
     ],
 
