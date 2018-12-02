@@ -15,7 +15,7 @@ print ("ECM", ECM)
 # Material properites
 # -------------------
 
-E=200*10^6
+E=200*(10**6)
 
 # Geomatric properties
 # ---------------------
@@ -46,7 +46,7 @@ ang = get_angle()
 # %Restrained DOF to Apply BC
 # %---------------------------
 
-BC=np.array([1, 2, 10], dtype=int)	#; %restrained dof
+BC=get_BC()
 
 # %Plotting the truss
 # %------------------
@@ -61,10 +61,11 @@ BC=np.array([1, 2, 10], dtype=int)	#; %restrained dof
 # %-----------------------------
 
 
-dof_node = (np.arange(n_dof * n_n).reshape((n_n, n_dof)))
+dof_node = (np.arange(n_dof*n_n).reshape((n_n, n_dof)))
 
 LCM = dof_node[ECM, :]
 LCM = (LCM.reshape(n_el, n_en*n_dof)).T
+print ("LCM", LCM)
 
 '''
 %Element local stiffness matrix ke
@@ -97,12 +98,48 @@ Kf=K
 
 k_local = get_k_global(A, E, L, ang)
 
+'''
+K = np.zeros((t_dof, t_dof))
+
+x, y, z = k_local.shape
+for k in range(z):
+    for i in range(x):
+        ii = LCM[i][k]
+        for j in range(y):
+            jj = LCM[j][k]
+            K[ii][jj] += k_local[i][j][k]
+
+print(K)
+
+ans = K.copy()
+print("================================")
+'''
+
+K = np.zeros((t_dof, t_dof))
+
+
+for i in range(n_el):
+    ind =  np.repeat(LCM[:, i], el_dof).reshape(el_dof, el_dof)
+    print(k_local[:, :, i], ind)
+    K[ind, ind.T] += k_local[:, :, i]
+
+# print('K', K)
+# print("================================")
+# print("================================")
+# print(K-ans)
+
+'''
+#NOT WORKING
 x = np.repeat(LCM, el_dof, axis = 0).reshape(el_dof, el_dof, n_el)
 y = np.transpose(x, (1, 0, 2))
 
 K = np.zeros((t_dof, t_dof))
 
 K[x, y] += k_local
+'''
+
+print ("K", K)
+Kf = K.copy()
 
 
 '''
@@ -119,7 +156,7 @@ end
 
 '''
 
-z = np.zeros((t_dof), dtype=int)
+z = np.zeros(t_dof, dtype=int)
 
 K[BC] = z
 K[BC, BC] = 1
@@ -138,14 +175,20 @@ F = get_force_vect()
 %-------------------
 '''
 
-d = np.matmul(np.linalg.inv(K), F)
+d = np.dot(np.linalg.inv(K), F)
+print('d', d)
 
 '''
 %Reaction forces
 %---------------
 
 fr=Kf*d
+'''
 
+fr = np.dot(Kf, d)
+print('fr', fr)
+
+'''
 %Axial forces
 %------------
 
@@ -156,7 +199,11 @@ for e=1:nel
     c=cos(e);
     force(e)=const*[-c -s c s]*de;
 end
+'''
 
+
+
+'''
 %Plotting the axial force
 %------------------------
 
