@@ -9,19 +9,22 @@ class Truss:
         n_bc = js["no_of_fixed_points"]
         n_dim = 3                       # dimensions
         n_en = 2                        # number of elements per node
-        n_dof = 6                       # number of dof per node
+        n_dof = n_dim*n_en              # number of dof per node
 
         self.n_n = n_n                  # number of nodes
         self.n_el = n_el                # number of elements
         self.n_en = n_en                # number of nodes in an element
         self.n_dof = n_dof              # number of dof per node
+
         self.coordinates = None
         self.ECM = None
         self.A = None
+        self.Y = None
         self.L = None
         self.LCM = None
         self.F = None
         self.BC = None
+        self.angle = None
 
         nodes = js["nodes"]
         element_type = js["element_type"]
@@ -34,10 +37,10 @@ class Truss:
             raise ValueError('All Nodes not defined')
         else:
             nodes = sorted(nodes, key=lambda x: x["id"])
-            if n_dim == 3:
-                self.coordinates = [(nodes[i]["x"], nodes[i]["y"], nodes[i]["z"]) for i in range(n_n)]
-            else:
-                self.todo()
+            try:
+                self.coordinates = np.array([(nodes[i]["x"], nodes[i]["y"], nodes[i]["z"]) for i in range(n_n)], dtype=int)
+            except:
+                self.todo("Dimension not 3D")
 
         if len(elements) != self.n_el:
             raise ValueError('All Elements not defined')
@@ -57,15 +60,15 @@ class Truss:
         if len(element_type) != n_cs:
             raise ValueError('All Element types not defined')
         else:
-            area = {}
-            youngs_mod = {}
+            self.get_AY(elements, element_type)
 
-            for el in element_type:
-                id = el["id"]
-                area[id] = self.get_area(el["shape"], el["dimensions"])
-                youngs_mod[id] = el["youngs_mod"]
 
-            self.todo()
+        # Calculate length
+        self.get_L()
+
+        # Calculate angle matrix
+        self.get_angle()
+
 
 
 
@@ -133,10 +136,137 @@ class Truss:
         if type == "rectangle":
             return dim["y"] * dim["z"]
         elif type == "circle":
-            return np.pi*dim["radium"]**2
+            return np.pi*dim["radius"]**2
         else:
             self.todo()
 
-    def todo(self):
-        raise ValueError("NOT YET COMPLETE")
+    def get_angle(self):
+        # Called by parent
+        if self.angle is None:
+            self.todo()
+        return self.angle
+
+    def get_AY(self, elements =  None, element_type = None):
+        # Called by parent
+        if self.A is None or self.Y is  None:
+            if elements is None or element_type is None:
+                raise ValueError("A and Y not defined")
+
+            area = {}
+            youngs_mod = {}
+
+            for el in element_type:
+                id = el["id"]
+                youngs_mod[id] = el["youngs_mod"]
+                # Get area
+                try:
+                    area[id] = self.get_area(el["shape"], el["dimensions"])
+                except:
+                    try:
+                        area[id] = el["area"]
+                    except:
+                        self.todo("Dimension not defined")
+
+
+            elements = sorted(elements, key=lambda x: x["id"])
+            type = [el["element_type"] for el in elements]
+
+            self.A = np.array([area[t] for t in type])
+            self.Y = np.array([youngs_mod[t] for t in type])
+
+        else:
+            return self.A,self.Y
+
+    def get_L(self):
+        if self.L is None:
+            if self.ECM is None or self.coordinates is None:
+                self.todo("Length parameters not defined")
+            print(self.ECM)
+            print(self.coordinates)
+            L = self.coordinates[self.ECM]
+            self.L = np.sqrt(np.sum(np.square(L[:, 0, :] - L [:, 1, :]), axis=1))
+        else:
+            return self.L
+
+
+
+
+    def get_k_local(self):
+        c = np.cos(self.ang)
+        s = np.sin(self.ang)
+
+        cc = c * c
+        ss = s * s
+        cs = s * c
+
+        arr = np.array([[cc, cs, -cc, -cs],
+                        [cs, ss, -cs, -ss],
+                        [-cc, -cs, cc, cs],
+                        [-cs, -ss, cs, ss]])
+
+        return arr
+
+    def get_k_global(self):
+        k = self.get_k_local()
+        const = self.A * self.E / self.L
+        return const * k
+
+    def get_K(self, k_local):
+        t_dof = self.n_n * self.n_dof
+        el_dof = self.n_en * self.n_dof
+
+        K = np.zeros((t_dof, t_dof))
+
+        for i in range(self.n_el):
+            ind = np.repeat(self.LCM[:, i], el_dof).reshape(el_dof, el_dof)
+            # print(k_local[:, :, i], ind)
+            K[ind, ind.T] += k_local[:, :, i]
+
+        return K
+
+    def apply_BC(self, K):
+        t_dof = self.n_n * self.n_dof
+
+        z = np.zeros(t_dof, dtype=int)
+
+        K[self.BC] = z
+        K[self.BC, self.BC] = 1
+
+        return K
+
+
+    ''' Modify only this function to optimize inverse'''
+    def inv(self, K):
+        return np.linalg.inv(K)
+
+
+
+
+
+    def main_func(self):
+
+        k_local = self.get_k_global()
+
+        K = self.get_K(k_local)
+        Kf = K.copy()
+
+        F = self.get_force_vect()
+
+        K_inv = self.inv(K)
+
+        d = np.dot(K_inv, F)
+        # print('d', d)
+
+        fr = np.dot(Kf, d)
+        # print('fr', fr)
+
+        self.todo()
+
+        return fr
+
+
+
+
+    def todo(self,td = "NOT YET COMPLETE"):
+        raise ValueError("TO DO : " + td)
 
