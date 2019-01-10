@@ -2,16 +2,11 @@
 
 This project is done as a requirement for CO328 as well. Please follow the guidelines below:
 
-## Forks
-* The repo was created at gihanchanaka because we don't have a paid account at TeambiteCode to create private repos. 
-* But please DONOT fork from gihanchanaka. Consider TeambiteCode repo as the central repo and fork it.
+## master branch
 
-## dev branch
-* Work on your fork's dev branch and send pull requests to the TeambiteCode repo dev branch.
-* Do not directly commit on anywhere other than your own repo's dev branch.
+This is the master branch. Please don't make any direct commits to this branch. Follow the procedure,
 
-## Pull requests
-* Please write elaborate commit comments.
-
-## Communication
-* Please use the group mailing list.
+1. Pull the latest master branch from TeambiteCode repo to your local.
+2. Merge your local dev to your local master.
+3. Push it to YOUR remote.
+4. Send a pull request to TeambiteCode/master
