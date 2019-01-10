@@ -1,4 +1,6 @@
+from Truss_class import *
 from func import *
+from JsonRead import *
 import numpy as np
 
 # Nodal coordinates
@@ -192,6 +194,7 @@ print('fr', fr)
 %Axial forces
 %------------
 
+Fax = EA/L * ROT * d
 for e=1:nel
     de=d(LCM(:,e));   %displacement of the current element
     const=CArea(e)*E/L(e); %constant parameter with in the elementt
