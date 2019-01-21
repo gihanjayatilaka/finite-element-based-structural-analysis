@@ -14,8 +14,12 @@ DOF_PER_NODE = 6
 NODES_PER_ELEMENT = 2
 DOF_PER_ELEMENT = DOF_PER_NODE * NODES_PER_ELEMENT
 
+sys.argv = ["structure00.json", "aa.txt"]
+
 
 def dumpResultToFile(displacementVector,dumpFileName):
+
+
     dictToDump={}
     dispList=[]
 
@@ -128,8 +132,11 @@ def angle(startNode, endNode):
 
 
 if __name__ == "__main__":
-    with open(sys.argv[1]) as data_file:
-        data = json.load(data_file)
+    data_file = open('structure00.json')
+    data = json.load(data_file)
+
+    # data_file = open(sys.argv[1], 'r')
+    # data = json.load(data_file)
 
     noNodes = data['no_of_nodes']
     noFixedNodes = data['no_of_fixed_points']
