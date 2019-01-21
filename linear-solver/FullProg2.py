@@ -21,6 +21,13 @@ def buildNode(nodeDict):
 
 
 def rotateK(k, ang):
+	# cx = (x2-x1)/L
+	# cy = (y2-y1)/L
+	# cz = (z2-z1)/L
+
+	# k = [cx, cy, cz, -cx, -cy, -cz]
+	# k = k.T*k
+
     if True:
         k[0,0]=0
         k[0,1]=0
