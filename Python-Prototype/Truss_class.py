@@ -143,6 +143,8 @@ class Truss:
     def get_angle(self):
         # Called by parent
         if self.angle is None:
+            cord = self.ECM[self.coordinates]
+            print(cord)
             self.todo()
         return self.angle
 
@@ -192,17 +194,18 @@ class Truss:
 
 
     def get_k_local(self):
-        c = np.cos(self.ang)
-        s = np.sin(self.ang)
 
-        cc = c * c
-        ss = s * s
-        cs = s * c
-
-        arr = np.array([[cc, cs, -cc, -cs],
-                        [cs, ss, -cs, -ss],
-                        [-cc, -cs, cc, cs],
-                        [-cs, -ss, cs, ss]])
+        # c = np.cos(self.ang)
+        # s = np.sin(self.ang)
+        #
+        # cc = c * c
+        # ss = s * s
+        # cs = s * c
+        #
+        # arr = np.array([[cc, cs, -cc, -cs],
+        #                 [cs, ss, -cs, -ss],
+        #                 [-cc, -cs, cc, cs],
+        #                 [-cs, -ss, cs, ss]])
 
         return arr
 
