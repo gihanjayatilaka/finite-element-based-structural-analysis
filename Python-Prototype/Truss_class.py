@@ -9,7 +9,7 @@ class Truss:
         n_bc = js["no_of_fixed_points"]
         n_dim = 3                       # dimensions
         n_en = 2                        # number of elements per node
-        n_dof = n_dim*n_en              # number of dof per node
+        n_dof = n_dim                   # number of dof per node
 
         self.n_n = n_n                  # number of nodes
         self.n_el = n_el                # number of elements
@@ -46,6 +46,7 @@ class Truss:
             raise ValueError('All Elements not defined')
         else:
             self.get_ECM(elements)      # Populate ECM matrix
+            self.get_LCM()              # Populate LCM matrix
 
         if len(loads) != n_loads:
             raise ValueError('All Loads not defined')
@@ -83,9 +84,13 @@ class Truss:
     def get_LCM(self):
         if self.LCM is None:
             dof_node = (np.arange(self.n_dof * self.n_n).reshape((self.n_n, self.n_dof)))
+            # print("dof", dof_node.shape)
 
             LCM = dof_node[self.ECM, :]
-            self.LCM = (LCM.reshape(self.n_el, self.n_en * self.n_dof)).T
+            # print("LCM", LCM.shape, LCM)
+
+            self.LCM = (LCM.reshape(self.n_el, self.n_dof*self.n_en)).T
+            # print("LCM**", self.LCM.shape, self.LCM)
 
         return self.LCM
 
@@ -94,7 +99,15 @@ class Truss:
         if loads is not None:
             n_loads = len(loads)
             self.F = np.zeros((self.n_n, self.n_dof))
-            if self.n_dof == 6:
+            if self.n_dof == 3:
+                dirs = ["x", "y", "z"]
+                ft = ["force", "torque"]
+                for i in range(n_loads):
+                    id = loads[i]["point_id"]
+                    for j in range(1):
+                        for k in range(3):
+                            self.F[id][3*j+k] = loads[i][ft[j]][dirs[k]]
+            elif self.n_dof == 6:
                 dirs = ["x", "y", "z"]
                 ft = ["force", "torque"]
                 for i in range(n_loads):
@@ -116,8 +129,16 @@ class Truss:
             n_bc = len(fixed_points)
             self.BC = np.ones((self.n_n, self.n_dof), dtype=int)
             if self.n_dof == 3:
-                raise ValueError("NOT YET COMPLETE")
-                pass
+                dirs = ["x", "y", "z"]
+                ft = ["translation", "rotation"]
+                for i in range(n_bc):
+                    id = fixed_points[i]["point_id"]
+                    for j in range(1):
+                        for k in range(3):
+                            if fixed_points[i][ft[j]][dirs[k]]:
+                                self.BC[id][3*j+k] = 0
+                # raise ValueError("NOT YET COMPLETE")
+                # pass
             elif self.n_dof == 6:
                 dirs = ["x", "y", "z"]
                 ft = ["translation", "rotation"]
@@ -143,7 +164,16 @@ class Truss:
     def get_angle(self):
         # Called by parent
         if self.angle is None:
-            self.todo()
+            if self.ECM is None or self.coordinates is None:
+                self.todo("Length parameters not defined")
+            cord = self.coordinates[self.ECM]
+            # print('cord', cord.shape, cord)
+            diff = cord[:, 1, :] - cord[:, 0, :]
+            # print('diff', diff)
+            ang = diff / self.L[:, np.newaxis]
+            # print('ang', ang.shape, ang)
+
+            self.angle = ang
         return self.angle
 
     def get_AY(self, elements =  None, element_type = None):
@@ -181,8 +211,8 @@ class Truss:
         if self.L is None:
             if self.ECM is None or self.coordinates is None:
                 self.todo("Length parameters not defined")
-            print(self.ECM)
-            print(self.coordinates)
+            # print(self.ECM)
+            # print(self.coordinates)
             L = self.coordinates[self.ECM]
             self.L = np.sqrt(np.sum(np.square(L[:, 0, :] - L [:, 1, :]), axis=1))
         else:
@@ -192,23 +222,45 @@ class Truss:
 
 
     def get_k_local(self):
-        c = np.cos(self.ang)
-        s = np.sin(self.ang)
+        if self.angle is None:
+            self.todo("Angle not defined")
 
-        cc = c * c
-        ss = s * s
-        cs = s * c
+        ang = np.cos(self.angle)
+        ang = np.hstack((ang, -ang))
 
-        arr = np.array([[cc, cs, -cc, -cs],
-                        [cs, ss, -cs, -ss],
-                        [-cc, -cs, cc, cs],
-                        [-cs, -ss, cs, ss]])
+        ang1 = ang[:, np.newaxis, :]
+        ang2 = ang[:, :, np.newaxis]
+
+        # print("ang", ang)
+
+        # print ("ang1", ang1.shape)
+        # print ("ang2", ang2.shape)
+
+        arr = np.matmul(ang2, ang1)
+
+        # print("ang", ang.shape)
+
+        # k = self.
+
+        # input()
+        # c = np.cos(self.ang)
+        # s = np.sin(self.ang)
+        #
+        # cc = c * c
+        # ss = s * s
+        # cs = s * c
+        #
+        # arr = np.array([[cc, cs, -cc, -cs],
+        #                 [cs, ss, -cs, -ss],
+        #                 [-cc, -cs, cc, cs],
+        #                 [-cs, -ss, cs, ss]])
 
         return arr
 
     def get_k_global(self):
         k = self.get_k_local()
-        const = self.A * self.E / self.L
+        const = self.A * self.Y / self.L
+        const = const[:, np.newaxis, np.newaxis]
         return const * k
 
     def get_K(self, k_local):
@@ -217,10 +269,14 @@ class Truss:
 
         K = np.zeros((t_dof, t_dof))
 
+        # print("LCM", self.LCM)
+
         for i in range(self.n_el):
+            # print(self.LCM[:, i])
             ind = np.repeat(self.LCM[:, i], el_dof).reshape(el_dof, el_dof)
-            # print(k_local[:, :, i], ind)
-            K[ind, ind.T] += k_local[:, :, i]
+            # print("ind", ind.shape)
+            # print("k", k_local[i, :, :].shape)
+            K[ind, ind.T] += k_local[i, :, :]
 
         return K
 
@@ -247,15 +303,29 @@ class Truss:
 
         k_local = self.get_k_global()
 
+        print("k_local", k_local)
+        input()
+
         K = self.get_K(k_local)
+
+        print("k_global", K)
+        input()
+
         Kf = K.copy()
 
+
         F = self.get_force_vect()
+
+        print("F", F)
+        input()
 
         K_inv = self.inv(K)
 
         d = np.dot(K_inv, F)
         # print('d', d)
+
+        print("d", d)
+        input()
 
         fr = np.dot(Kf, d)
         # print('fr', fr)
