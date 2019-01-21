@@ -1,3 +1,10 @@
+'''
+python FullProg2.py ../Structure-Files/structure00/structure00.json ./aa.txt
+
+
+
+'''
+
 import json
 import sys
 import numpy as np
