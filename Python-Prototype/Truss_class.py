@@ -1,11 +1,13 @@
-import sys
+import sys, os
+
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
-log = logging.getLogger()
-log.disabled = True
+# logging.basicConfig(level=logging.DEBUG)
+# log = logging.getLogger()
+# log.disabled = True
 
-sys.path.append('C:/Users/User/Documents/GitHub/finite-element-based-structural-analysis/Python-Prototype')
+parent = os.path.dirname(os.getcwd())
+sys.path.append(parent)
 
 import numpy as np
 
@@ -92,7 +94,7 @@ class Truss:
                 elements = self.structure["elements"]
             elements = sorted(elements, key=lambda x: x["id"])
             self.ECM = np.array([[elements[i]["start_node_id"], elements[i]["end_node_id"]] for i in range(self.n_el)], dtype = int)
-        log.info(self.ECM)
+        # log.info(self.ECM)
         # print(self.ECM)
         return self.ECM
 
@@ -334,8 +336,8 @@ class Truss:
 
         for i in range(n_n):
             for j in range(n_dof):
-                out[i]["dist"][j] = d[i*n_dof + j]
-                out[i]["force"][j] = F[i * n_dof + j]
+                out[i]["dist"][str(j)] = d[i*n_dof + j]
+                out[i]["force"][str(j)] = F[i * n_dof + j]
 
         d = {"nodes" : out}
 
@@ -352,6 +354,7 @@ class Truss:
 
         k_local = self.get_k_global()
 
+
         # print("k_local", k_local)
         # input()
 
@@ -367,6 +370,10 @@ class Truss:
         # print("F", F)
         # input()
         K_inv = self.inv(K)
+
+        # print()
+        # print(K_inv)
+        # print()
 
         d = np.dot(K_inv, F)
 
@@ -393,7 +400,7 @@ if __name__ == '__main__':
     truss = Truss(structure)
     d, fr = truss.main_func()
     out = truss.gen_output(d, fr)
-    writeFile(out, 'output00.json')
+    writeFile(out, 'temp.json')
 
 
 

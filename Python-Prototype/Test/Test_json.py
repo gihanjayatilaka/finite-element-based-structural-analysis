@@ -1,6 +1,11 @@
+import os, sys
+
+parent = os.path.dirname(os.getcwd())
+sys.path.append(parent)
+
+
 import unittest
 from JsonRead import readFile, writeFile
-
 
 class Test_Truss(unittest.TestCase):
 
@@ -123,7 +128,7 @@ class Test_Truss(unittest.TestCase):
 
                 ]
             }
-        file = "../structure00.json"
+        file = "Structures/structure00.json"
         self.assertDictEqual(readFile(file), js)
 
     def test_write(self):
@@ -245,7 +250,7 @@ class Test_Truss(unittest.TestCase):
 
                 ]
             }
-        file = "temp.json"
+        file = "Actual_output/test.json"
         writeFile(js, file)
         js_ = readFile(file)
         self.assertDictEqual(js_, js)

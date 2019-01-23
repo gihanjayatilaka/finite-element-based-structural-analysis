@@ -1,1 +1,1 @@
-python -m -v unittest Test_Truss.Test_Truss
+python -m unittest Test_Truss.Test_Truss -v
