@@ -22,7 +22,6 @@ class Truss:
         n_en = 2                        # number of elements per node
         n_dof = 3                         # number of dof per node
 
-
         self.n_n = n_n                  # number of nodes
         self.n_el = n_el                # number of elements
         self.n_en = n_en                # number of nodes in an element
@@ -317,6 +316,34 @@ class Truss:
     def inv(self, K):
         return np.linalg.inv(K)
 
+    def gen_output(self, d, F):
+        nodes = sorted(self.structure["nodes"], key=lambda x: x["id"])
+
+        id = [node["id"] for node in nodes]
+        out = [{"id" : i,
+                "dist" : {},
+                "force" : {}}
+               for i in id]
+
+
+        n_n = len(nodes)
+
+        if n_n == 0:
+            self.todo("ERROR : Number of nodes cannot be 0")
+        n_dof = len(nodes[0])-1
+
+        for i in range(n_n):
+            for j in range(n_dof):
+                out[i]["dist"][j] = d[i*n_dof + j]
+                out[i]["force"][j] = F[i * n_dof + j]
+
+        d = {"nodes" : out}
+
+        return d
+
+
+
+
 
 
 
@@ -325,36 +352,34 @@ class Truss:
 
         k_local = self.get_k_global()
 
-        print("k_local", k_local)
-        input()
+        # print("k_local", k_local)
+        # input()
 
         K = self.get_K(k_local)
 
-        print("k_global", K)
-        input()
+        # print("k_global", K)
+        # input()
 
         Kf = K.copy()
 
 
         F = self.get_force_vect()
-
-        print("F", F)
-        input()
-
+        # print("F", F)
+        # input()
         K_inv = self.inv(K)
 
         d = np.dot(K_inv, F)
-        # print('d', d)
 
-        print("d", d)
-        input()
 
         fr = np.dot(Kf, d)
+
+        # print("d", d)
         # print('fr', fr)
+        # input()
 
         # self.todo()
 
-        return fr
+        return d, fr
 
 
 
@@ -363,7 +388,13 @@ class Truss:
         raise ValueError("TO DO : " + td)
 
 if __name__ == '__main__':
-    from JsonRead import readFile
-    js = readFile('structure00.json')
-    truss = Truss(js)
-    out = truss.main_func()
+    from JsonRead import readFile, writeFile
+    structure = readFile('structure00.json')
+    truss = Truss(structure)
+    d, fr = truss.main_func()
+    out = truss.gen_output(d, fr)
+    writeFile(out, 'output00.json')
+
+
+
+

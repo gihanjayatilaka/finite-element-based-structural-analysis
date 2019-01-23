@@ -1,6 +1,17 @@
+import os
 import sys
 
-sys.path.append('C:/Users/User/Documents/GitHub/finite-element-based-structural-analysis/Python-Prototype')
+parent = os.path.dirname(os.getcwd())
+sys.path.append(parent)
+
+# path = os.path.dirname(os.path.abspath(__file__))
+# print(path)
+# print(os.pardir)
+# print(os.pardir)
+# print(os.path.join(path, os.pardir))
+#
+# print(os.path.dirname(os.getcwd()))
+# sys.path.append(path)
 
 import unittest
 from Truss_class import Truss
