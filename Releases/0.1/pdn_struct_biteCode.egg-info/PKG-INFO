@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: pdn-struct-biteCode
+Version: 0.1
+Summary: A structural analysis software package
+Home-page: https://github.com/TeambiteCode/finite-element-based-structural-analysis
+Author: Team biteCode
+Author-email: bitecode@eng.pdn.ac.lk
+License: UNKNOWN
+Description: A structural analysis software developed by Department of Computer Engineering, University of Peradeniya in colloboration with the Department of Civil Enginneing, University of Peradeniya
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
