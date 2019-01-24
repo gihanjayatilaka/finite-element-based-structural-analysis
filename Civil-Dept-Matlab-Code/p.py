@@ -1,6 +1,4 @@
-from Truss_class import *
 from func import *
-from JsonRead import *
 import numpy as np
 
 # Nodal coordinates
@@ -122,7 +120,7 @@ K = np.zeros((t_dof, t_dof))
 
 for i in range(n_el):
     ind =  np.repeat(LCM[:, i], el_dof).reshape(el_dof, el_dof)
-    print(k_local[:, :, i], ind)
+    #print(k_local[:, :, i], ind)
     K[ind, ind.T] += k_local[:, :, i]
 
 # print('K', K)
@@ -176,7 +174,7 @@ F = get_force_vect()
 %Displacement vector
 %-------------------
 '''
-
+print("inv",np.linalg.inv(K))
 d = np.dot(np.linalg.inv(K), F)
 print('d', d)
 
@@ -194,7 +192,6 @@ print('fr', fr)
 %Axial forces
 %------------
 
-Fax = EA/L * ROT * d
 for e=1:nel
     de=d(LCM(:,e));   %displacement of the current element
     const=CArea(e)*E/L(e); %constant parameter with in the elementt
