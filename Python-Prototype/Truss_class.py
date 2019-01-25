@@ -94,7 +94,6 @@ class Truss:
                 elements = self.structure["elements"]
             elements = sorted(elements, key=lambda x: x["id"])
             self.ECM = np.array([[elements[i]["start_node_id"], elements[i]["end_node_id"]] for i in range(self.n_el)], dtype = int)
-        # log.info(self.ECM)
         # print(self.ECM)
         return self.ECM
 
@@ -218,8 +217,11 @@ class Truss:
             elements = sorted(elements, key=lambda x: x["id"])
             type = [el["element_type"] for el in elements]
 
-            self.A = np.array([area[t] for t in type])
-            self.Y = np.array([youngs_mod[t] for t in type])
+            try:
+                self.A = np.array([area[t] for t in type])
+                self.Y = np.array([youngs_mod[t] for t in type])
+            except:
+                self.todo("Element type not defined")
 
         else:
             return self.A,self.Y
@@ -228,8 +230,7 @@ class Truss:
         if self.L is None:
             if self.ECM is None or self.coordinates is None:
                 self.todo("Length parameters not defined")
-            # print(self.ECM)
-            # print(self.coordinates)
+
             L = self.coordinates[self.ECM]
             self.L = np.sqrt(np.sum(np.square(L[:, 0, :] - L [:, 1, :]), axis=1))
         else:
@@ -251,29 +252,7 @@ class Truss:
             ang1 = ang[:, np.newaxis, :]
             ang2 = ang[:, :, np.newaxis]
 
-            # print("ang", ang)
-
-            # print ("ang1", ang1.shape)
-            # print ("ang2", ang2.shape)
-
             arr = np.matmul(ang2, ang1)
-
-            # print("ang", ang.shape)
-
-            # k = self.
-
-            # input()
-            # c = np.cos(self.ang)
-            # s = np.sin(self.ang)
-            #
-            # cc = c * c
-            # ss = s * s
-            # cs = s * c
-            #
-            # arr = np.array([[cc, cs, -cc, -cs],
-            #                 [cs, ss, -cs, -ss],
-            #                 [-cc, -cs, cc, cs],
-            #                 [-cs, -ss, cs, ss]])
 
         elif self.n_dof == 6:
             self.todo()
@@ -295,10 +274,9 @@ class Truss:
         # print("LCM", self.LCM)
 
         for i in range(self.n_el):
-            # print(self.LCM[:, i])
+
             ind = np.repeat(self.LCM[:, i], el_dof).reshape(el_dof, el_dof)
-            # print("ind", ind.shape)
-            # print("k", k_local[i, :, :].shape)
+
             K[ind, ind.T] += k_local[i, :, :]
 
         return K
@@ -353,30 +331,14 @@ class Truss:
     def main_func(self):
 
         k_local = self.get_k_global()
-
-
-        # print("k_local", k_local)
-        # input()
-
         K = self.get_K(k_local)
-
-        # print("k_global", K)
-        # input()
-
         Kf = K.copy()
 
-
-        F = self.get_force_vect()
-        # print("F", F)
-        # input()
+        K = self.apply_BC(K)
         K_inv = self.inv(K)
 
-        # print()
-        # print(K_inv)
-        # print()
-
+        F = self.get_force_vect()
         d = np.dot(K_inv, F)
-
 
         fr = np.dot(Kf, d)
 
@@ -396,7 +358,7 @@ class Truss:
 
 if __name__ == '__main__':
     from JsonRead import readFile, writeFile
-    structure = readFile('structure00.json')
+    structure = readFile('structure01.json')
     truss = Truss(structure)
     d, fr = truss.main_func()
     out = truss.gen_output(d, fr)

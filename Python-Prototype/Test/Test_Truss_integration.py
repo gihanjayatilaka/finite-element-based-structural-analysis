@@ -15,8 +15,8 @@ class Test_Truss_integration(unittest.TestCase):
 
     def test_main(self):
         self.maxDiff = None
-        struct_files = ['structure00.json']
-        out_files = ['output00.json']
+        struct_files = ['structure00.json', 'structure01.json']
+        out_files = ['output00.json', 'output01.json']
 
         for x, y in zip(struct_files, out_files):
             structure = readFile('Structures/' + x)
