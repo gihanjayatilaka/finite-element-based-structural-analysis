@@ -358,7 +358,7 @@ class Truss:
 
 if __name__ == '__main__':
     from JsonRead import readFile, writeFile
-    structure = readFile('structure01.json')
+    structure = readFile('structure00.json')
     truss = Truss(structure)
     d, fr = truss.main_func()
     out = truss.gen_output(d, fr)
