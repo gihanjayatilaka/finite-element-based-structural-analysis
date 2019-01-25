@@ -1,7 +1,20 @@
+import sys, os
+
+import logging
+
+# logging.basicConfig(level=logging.DEBUG)
+# log = logging.getLogger()
+# log.disabled = True
+
+parent = os.path.dirname(os.getcwd())
+sys.path.append(parent)
+
 import numpy as np
 
 class Truss:
     def __init__(self, js):
+        self.structure = js
+
         n_n = js["no_of_nodes"]
         n_el = js["no_of_elements"]
         n_loads = js["no_of_loads"]
@@ -9,12 +22,13 @@ class Truss:
         n_bc = js["no_of_fixed_points"]
         n_dim = 3                       # dimensions
         n_en = 2                        # number of elements per node
-        n_dof = n_dim                   # number of dof per node
+        n_dof = 3                         # number of dof per node
 
         self.n_n = n_n                  # number of nodes
         self.n_el = n_el                # number of elements
         self.n_en = n_en                # number of nodes in an element
         self.n_dof = n_dof              # number of dof per node
+        self.n_loads = n_loads          # number of loads
 
         self.coordinates = None
         self.ECM = None
@@ -75,22 +89,25 @@ class Truss:
 
     def get_ECM(self, elements = None):
         # Called by parent
-        if elements is not None:
+        if self.ECM is None:
+            if elements is None:
+                elements = self.structure["elements"]
             elements = sorted(elements, key=lambda x: x["id"])
             self.ECM = np.array([[elements[i]["start_node_id"], elements[i]["end_node_id"]] for i in range(self.n_el)], dtype = int)
-        else:
-            return self.ECM
+        # log.info(self.ECM)
+        # print(self.ECM)
+        return self.ECM
 
     def get_LCM(self):
         if self.LCM is None:
             dof_node = (np.arange(self.n_dof * self.n_n).reshape((self.n_n, self.n_dof)))
-            # print("dof", dof_node.shape)
+            # log.debug("dof", dof_node.shape)
 
             LCM = dof_node[self.ECM, :]
-            # print("LCM", LCM.shape, LCM)
+            # log.debug("LCM", LCM.shape, LCM)
 
             self.LCM = (LCM.reshape(self.n_el, self.n_dof*self.n_en)).T
-            # print("LCM**", self.LCM.shape, self.LCM)
+            # log.info("LCM**", self.LCM.shape, self.LCM)
 
         return self.LCM
 
@@ -225,35 +242,41 @@ class Truss:
         if self.angle is None:
             self.todo("Angle not defined")
 
-        ang = np.cos(self.angle)
-        ang = np.hstack((ang, -ang))
+        arr = None
 
-        ang1 = ang[:, np.newaxis, :]
-        ang2 = ang[:, :, np.newaxis]
+        if self.n_dof == 3:
+            ang = np.cos(self.angle)
+            ang = np.hstack((ang, -ang))
 
-        # print("ang", ang)
+            ang1 = ang[:, np.newaxis, :]
+            ang2 = ang[:, :, np.newaxis]
 
-        # print ("ang1", ang1.shape)
-        # print ("ang2", ang2.shape)
+            # print("ang", ang)
 
-        arr = np.matmul(ang2, ang1)
+            # print ("ang1", ang1.shape)
+            # print ("ang2", ang2.shape)
 
-        # print("ang", ang.shape)
+            arr = np.matmul(ang2, ang1)
 
-        # k = self.
+            # print("ang", ang.shape)
 
-        # input()
-        # c = np.cos(self.ang)
-        # s = np.sin(self.ang)
-        #
-        # cc = c * c
-        # ss = s * s
-        # cs = s * c
-        #
-        # arr = np.array([[cc, cs, -cc, -cs],
-        #                 [cs, ss, -cs, -ss],
-        #                 [-cc, -cs, cc, cs],
-        #                 [-cs, -ss, cs, ss]])
+            # k = self.
+
+            # input()
+            # c = np.cos(self.ang)
+            # s = np.sin(self.ang)
+            #
+            # cc = c * c
+            # ss = s * s
+            # cs = s * c
+            #
+            # arr = np.array([[cc, cs, -cc, -cs],
+            #                 [cs, ss, -cs, -ss],
+            #                 [-cc, -cs, cc, cs],
+            #                 [-cs, -ss, cs, ss]])
+
+        elif self.n_dof == 6:
+            self.todo()
 
         return arr
 
@@ -295,6 +318,34 @@ class Truss:
     def inv(self, K):
         return np.linalg.inv(K)
 
+    def gen_output(self, d, F):
+        nodes = sorted(self.structure["nodes"], key=lambda x: x["id"])
+
+        id = [node["id"] for node in nodes]
+        out = [{"id" : i,
+                "dist" : {},
+                "force" : {}}
+               for i in id]
+
+
+        n_n = len(nodes)
+
+        if n_n == 0:
+            self.todo("ERROR : Number of nodes cannot be 0")
+        n_dof = len(nodes[0])-1
+
+        for i in range(n_n):
+            for j in range(n_dof):
+                out[i]["dist"][str(j)] = d[i*n_dof + j]
+                out[i]["force"][str(j)] = F[i * n_dof + j]
+
+        d = {"nodes" : out}
+
+        return d
+
+
+
+
 
 
 
@@ -303,40 +354,54 @@ class Truss:
 
         k_local = self.get_k_global()
 
-        print("k_local", k_local)
-        input()
+
+        # print("k_local", k_local)
+        # input()
 
         K = self.get_K(k_local)
 
-        print("k_global", K)
-        input()
+        # print("k_global", K)
+        # input()
 
         Kf = K.copy()
 
 
         F = self.get_force_vect()
-
-        print("F", F)
-        input()
-
+        # print("F", F)
+        # input()
         K_inv = self.inv(K)
 
-        d = np.dot(K_inv, F)
-        # print('d', d)
+        # print()
+        # print(K_inv)
+        # print()
 
-        print("d", d)
-        input()
+        d = np.dot(K_inv, F)
+
 
         fr = np.dot(Kf, d)
+
+        # print("d", d)
         # print('fr', fr)
+        # input()
 
-        self.todo()
+        # self.todo()
 
-        return fr
+        return d, fr
 
 
 
 
     def todo(self,td = "NOT YET COMPLETE"):
         raise ValueError("TO DO : " + td)
+
+if __name__ == '__main__':
+    from JsonRead import readFile, writeFile
+    structure = readFile('structure00.json')
+    truss = Truss(structure)
+    d, fr = truss.main_func()
+    out = truss.gen_output(d, fr)
+    writeFile(out, 'temp.json')
+
+
+
 
