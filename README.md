@@ -17,12 +17,12 @@ https://doi.org/10.1016/j.engstruct.2019.01.075.*
 [**Project Report**](https://github.com/gihanjayatilaka/finite-element-based-structural-analysis/blob/dev/Documentation/CO328-project-report.pdf), [**Project Presentation**](https://github.com/gihanjayatilaka/finite-element-based-structural-analysis/blob/dev/Documentation/CO328-project-presentation.pdf)
 
 * Civil engineering structure modelling
- * Elementwise local stiffness matrix calculation generation.
- * Structure's global stiffnexx matrix calculation.
- * Load matrix generation.
+  * Elementwise local stiffness matrix calculation generation.
+  * Structure's global stiffnexx matrix calculation.
+  * Load matrix generation.
 * Lieanr system oprations.
- * Linear system representation : dense and sparse
- * Linear system solving: Gauss ellimination on dense and sparse matrices, iterative numerical techniques.
+  * Linear system representation : dense and sparse
+  * Linear system solving: Gauss ellimination on dense and sparse matrices, iterative numerical techniques.
 * Backtracking to translate the linear system solution to civil engineering structure.
 
 The main objective of this project was to find the **time and memroy efficient** way of computing the results.
