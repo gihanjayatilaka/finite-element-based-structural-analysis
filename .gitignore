@@ -1,1 +1,9 @@
 cudaImplementation/2dtruss/2dtruss.VC.db
+.gitignore
+.idea
+.pyc
+*\.pyc
+.ipynb
+*\.ipynb
+.ipynb_checkpoints
+
