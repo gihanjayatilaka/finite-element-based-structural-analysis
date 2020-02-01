@@ -12,4 +12,5 @@ Advised by: [Dr. Kushan Wijesundara](http://eng.pdn.ac.lk/civil/people/drKKWijes
 
 This work was done as a partial requirement for [CO328 Software Engineering](http://www.ce.pdn.ac.lk/undergraduate-courses/)) course. **This implementation consists of the linear elastic region analysis only.**
 
-This work will be continued by [Pubudu](https://github.com/pubuduudara). Please contact him for the latest version (which will be developed from scratch **without** using code from this repository).
+
+This work will be continued by at [https://github.com/pubuduudara/finite-element-based-structural-non-linear-analysis/](https://github.com/pubuduudara/finite-element-based-structural-non-linear-analysis/). Please contact [pubuduudara7@gmail.com](pubuduudara7@gmail.com) if the repository is private. Their work **might** have backward compatibility for input format but they will **not** be using the code from this project.
